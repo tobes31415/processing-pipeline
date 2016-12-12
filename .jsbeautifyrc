@@ -1,0 +1,7 @@
+{
+    "max_preserve_newlines": 0,
+    "brace_style": "expand",
+    "end_with_newline": true,
+    "indent_size":4,
+    "lookup":false
+}

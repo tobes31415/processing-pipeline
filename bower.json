@@ -1,0 +1,19 @@
+{
+  "name": "processing-pipeline",
+  "devDependencies": {
+    "requirejs": "^2.3.2",
+    "knockout": "^3.4.1"
+  },
+  "ignore": [
+    "devSrc/**/*",
+    "gulptasks/**/*",
+    "libSrc/**/*",
+    "test/**/*",
+    ".*",
+    "gulpfile.js",
+    "readme.md"
+  ],
+  "main":[
+    "publish/processing-pipeline.js"
+  ]
+}

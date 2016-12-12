@@ -1,0 +1,10 @@
+bin
+devSrc
+libSrc
+node_modules
+.gitignore
+.npmignore
+*.json
+*.js
+*.html
+*.txt
