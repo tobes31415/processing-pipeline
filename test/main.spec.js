@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import foo from 'shared-worker-polyfill';
+import foo from './bower_components/processing-pipeline/dist/processing-pipeline.js';
 
 console.log(foo);
 
@@ -12,7 +12,7 @@ describe('a simple test', function()
     
     /*
     it('always fails', function(){
-        assert.equal(1, 1);
+        assert.equal(1, 2);
     });
     */
 });

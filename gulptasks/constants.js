@@ -5,11 +5,11 @@ module.exports = {
     devSrc :'./devSrc/',
     libSrc : './libSrc/',
     
-    libOut :'./publish/',
+    libOut :'./dist/',
     devOut: './bin/',
     testOut: './binTest/',
     
-    libName: 'processing-pipeline/publish',
+    libName: 'processing-pipeline/dist',
     
     libSrcEntry:'main.js',
     devSrcEntry:'index.js',
