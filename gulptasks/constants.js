@@ -15,5 +15,6 @@ module.exports = {
     devSrcEntry:'index.js',
     
     libOutEntry :'processing-pipeline.js',
+    libOutMinEntry :'processing-pipeline.min.js',
     devOutEntry:'index.js'
 }

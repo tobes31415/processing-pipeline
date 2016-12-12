@@ -28,7 +28,7 @@ function packFiles(entryFilename, outputPath, outputFilename, debug, callback)
         //Minify
         //
         // Uglify doesn't support ES6 yet
-        //options.plugins: [new webpack.optimize.UglifyJsPlugin()]
+        options.plugins = [new webpack.optimize.UglifyJsPlugin()]
     }
     webpack(options
     ,function(err, stats){
@@ -49,8 +49,12 @@ function packFiles(entryFilename, outputPath, outputFilename, debug, callback)
     });
 }
 
-gulp.task('webpack-publish', function(callback){
-    packFiles(env.libSrc+env.libSrcEntry,env.libOut, env.libOutEntry, false, callback);
+gulp.task('webpack-publish-min', function(callback){
+    packFiles(env.libSrc+env.libSrcEntry,env.libOut, env.libOutMinEntry, false, callback);
+});
+
+gulp.task('webpack-publish', ['webpack-publish-min'], function(callback){
+    packFiles(env.libSrc+env.libSrcEntry,env.libOut, env.libOutEntry, true, callback);
 });
 
 gulp.task('copyPackage.json', function(){

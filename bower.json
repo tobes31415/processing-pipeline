@@ -11,9 +11,10 @@
     "test",
     ".*",
     "gulpfile.js",
-    "readme.md"
+    "readme.md",
+    "dist/processing-pipeline.js"
   ],
   "main":[
-    "publish/processing-pipeline.js"
+    "dist/processing-pipeline.min.js"
   ]
 }
