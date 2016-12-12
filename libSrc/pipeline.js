@@ -1,4 +1,3 @@
-"use strict";
 import CacheManager from './cacheManager.js';
 import detectChanges from './changeDetector.js';
 
@@ -10,6 +9,8 @@ const DEFAULT_PROCESSOR = "start";
 
 function Pipeline()
 {
+    "use strict";
+
     var self = this;
     var failBehaviour = FAIL_BEHAVIOUR_HALT;
     var queue = [];
@@ -17,55 +18,74 @@ function Pipeline()
     var isHalted = false;
     var currentlyProcessing = false;
     var history = {};
-    
+
     self.process = process;
     self.halt = halt;
     self.restart = restart;
     self.onFail = onFail;
-    
+
     ////////////////////
-    
+
     function process(model, processor)
-    {        
-        queue.push({model:model, processor:processor||DEFAULT_PROCESSOR});
+    {
+        queue.push(
+        {
+            model: model,
+            processor: processor || DEFAULT_PROCESSOR
+        });
         checkState();
     }
-    
+
     function halt()
     {
         isHalted = true;
     }
-    
+
     function restart()
     {
         isHalted = false;
         queue = [];
-        queue.push({model:{},processor:cache.clear});
+        queue.push(
+        {
+            model:
+            {},
+            processor: cache.clear
+        });
         checkState();
     }
-    
+
     function checkState()
     {
         if (isHalted)
-        {return;}
-        
-        if(currentlyProcessing)
-        {return;}
-    
+        {
+            return;
+        }
+
+        if (currentlyProcessing)
+        {
+            return;
+        }
+
         if (queue.length > 0)
         {
             var next = queue.shift();
             var cleanup = function()
             {
                 currentlyProcessing = false;
-                setTimeout(checkState,0);
+                setTimeout(checkState, 0);
             };
-            var whenDone = runProcessor(next.processor, {model:next.model, history:history, changed:{}})
+            var whenDone = runProcessor(next.processor,
+            {
+                model: next.model,
+                history: history,
+                changed:
+                {}
+            });
             whenDone.catch(handleError);
             whenDone.then(cleanup, cleanup);
         }
     }
-    
+
     function handleError(err)
     {
         if (failBehaviour === FAIL_BEHAVIOUR_HALT)
@@ -78,7 +98,7 @@ function Pipeline()
             console.warn(err);
         }
     }
-    
+
     function runProcessor(processor, context)
     {
         if (!processor)
@@ -91,7 +111,12 @@ function Pipeline()
         }
         if (typeof processor === "function")
         {
-            return Promise.resolve(processor({model:context.model, changed:context.changed, cache:cache.get(self, processor)}));
+            return Promise.resolve(processor(
+            {
+                model: context.model,
+                changed: context.changed,
+                cache: cache.get(self, processor)
+            }));
         }
         else if (typeof processor === "string")
         {
@@ -99,15 +124,19 @@ function Pipeline()
         }
         else if (Array.isArray(processor))
         {
-            return new Promise(function(resolve, reject){
+            return new Promise(function(resolve, reject)
+            {
                 var temp = processor.slice();
+
                 function processNext()
                 {
                     if (temp.length === 0)
-                    {resolve();}
+                    {
+                        resolve();
+                    }
                     else
                     {
-                        var current = runProcessor(temp.shift(),context);
+                        var current = runProcessor(temp.shift(), context);
                         current.catch(handleError);
                         current.then(processNext, processNext);
                     }
@@ -118,7 +147,7 @@ function Pipeline()
         {
             if (!Array.isArray(process.runs))
             {
-                throw new Error("Object based processor must have an array of sub processors called 'runs'")
+                throw new Error("Object based processor must have an array of sub processors called 'runs'");
             }
             var runThis = true;
             if (Array.isArray(processor.watches))
@@ -135,14 +164,13 @@ function Pipeline()
             }
         }
     }
-    
+
     function onFail(behaviour)
     {
         if (behaviour !== "halt" && behaviour !== "warn")
         {
-            throw new Error("On fail only accepts a single string value which must be exactly '"+FAIL_BEHAVIOUR_HALT+"' or '"+FAIL_BEHAVIOUR_WARN+"'");
+            throw new Error("On fail only accepts a single string value which must be exactly '" + FAIL_BEHAVIOUR_HALT + "' or '" + FAIL_BEHAVIOUR_WARN + "'");
         }
         failBehaviour = behaviour;
     }
 }
-

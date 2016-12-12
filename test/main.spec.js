@@ -7,9 +7,8 @@ console.log(foo);
 describe('a simple test', function()
 {
 
-    it('always passes', function(){
-    });
-    
+    it('always passes', function() {});
+
     /*
     it('always fails', function(){
         assert.equal(1, 2);
