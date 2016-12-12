@@ -11,7 +11,7 @@ module.exports = {
     
     libName: 'processing-pipeline/dist',
     
-    libSrcEntry:'main.js',
+    libSrcEntry:'pipelineFactory.js',
     devSrcEntry:'index.js',
     
     libOutEntry :'processing-pipeline.js',
