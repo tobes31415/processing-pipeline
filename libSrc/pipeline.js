@@ -1,5 +1,6 @@
 import CacheManager from './cacheManager.js';
 import detectChanges from './changeDetector.js';
+import Deferred from './deferred.js';
 
 export default Pipeline;
 
@@ -28,12 +29,15 @@ function Pipeline()
 
     function process(model, processor)
     {
+        var defer = Deferred();
         queue.push(
         {
+            deferred: defer,
             model: model,
             processor: processor || DEFAULT_PROCESSOR
         });
         checkState();
+        return defer.promise;
     }
 
     function halt()
@@ -72,6 +76,7 @@ function Pipeline()
             var cleanup = function()
             {
                 currentlyProcessing = false;
+                next.deferred.resolve();
                 setTimeout(checkState, 0);
             };
             var whenDone = runProcessor(next.processor,

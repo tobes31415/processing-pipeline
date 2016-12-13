@@ -1,4 +1,4 @@
-export function hasChanged(key, context)
+export function detectChanges(key, context)
 {
     if ((context.history[key] === undefined) !== (context.model[key] === undefined))
     {

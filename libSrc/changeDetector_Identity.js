@@ -1,23 +1,28 @@
-export function hasChanged(key, context)
+export function detectChanges(propName, context)
 {
-    var value = context.model[key];
-    if (value === undefined)
+    var value = context.model[propName];
+    var history = context.history[propName];
+    if ((history === undefined) !== (value === undefined))
     {
-        return context.history[key] !== undefined;
+        return true;
+    }
+    else if (value === undefined)
+    {
+        return false;
     }
     else if (typeof value === "object")
     {
         var checked = {};
         var keys = [];
-        for(var key in value)
+        for (var key1 in value)
         {
-            keys.push(value);
+            keys.push(key1);
         }
-        for(var key in context.history[key])
+        for (var key2 in history)
         {
-            keys.push(value);
+            keys.push(key2);
         }
-        for(var i=0;i<keys.length;i++)
+        for (var i = 0; i < keys.length; i++)
         {
             var subkey = keys[i];
             if (checked[subkey])
@@ -25,7 +30,7 @@ export function hasChanged(key, context)
                 continue;
             }
             checked[subkey] = true;
-            if(context.model[key][subkey] !== context.history[key][subkey])
+            if (value[subkey] !== history[subkey])
             {
                 return true;
             }
@@ -34,28 +39,28 @@ export function hasChanged(key, context)
     }
     else
     {
-        return context.history[key] = context.model[key];
+        return history !== value;
     }
 }
 
-export function updateHistory(key, context)
+export function updateHistory(propName, context)
 {
-    var value = context.model[key];
+    var value = context.model[propName];
     if (value === undefined)
     {
-        delete context.history[key];
+        delete context.history[propName];
     }
     else if (typeof value === "object")
     {
-        context.history[key] = context.history[key] || {};
+        context.history[propName] = context.history[propName] ||
+        {};
         for (var subkey in value)
         {
-            context.history[key][subkey] = value[subkey];
+            context.history[propName][subkey] = value[subkey];
         }
     }
     else
     {
-        context.history[key] = context.model[key];
+        context.history[propName] = context.model[propName];
     }
-    
 }
