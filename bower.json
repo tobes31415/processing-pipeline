@@ -12,9 +12,9 @@
     ".*",
     "gulpfile.js",
     "readme.md",
-    "dist/processing-pipeline.js"
+    "bower.json"
   ],
   "main":[
-    "dist/processing-pipeline.min.js"
+    "dist/processing-pipeline.js"
   ]
 }
