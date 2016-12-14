@@ -4,8 +4,8 @@ import Deferred from './deferred.js';
 
 export default Pipeline;
 
-const FAIL_BEHAVIOUR_HALT = "HALT";
-const FAIL_BEHAVIOUR_WARN = "WARN";
+const FAIL_BEHAVIOUR_HALT = "halt";
+const FAIL_BEHAVIOUR_WARN = "warn";
 const DEFAULT_PROCESSOR = "start";
 
 function Pipeline()
@@ -20,10 +20,12 @@ function Pipeline()
     var currentlyProcessing = false;
     var history = {};
 
+    self.processors = {};
     self.process = process;
     self.halt = halt;
     self.restart = restart;
     self.onFail = onFail;
+    self.suppressConsole = false;
 
     ////////////////////
 
@@ -83,26 +85,40 @@ function Pipeline()
             {
                 currentlyProcessing = false;
                 changeDetector.updateHistory(context);
-                next.deferred.resolve();
                 setTimeout(checkState, 0);
             };
             var whenDone = runProcessor(context, next.processor);
-            whenDone.catch(handleError);
+            whenDone.catch(handleError(next.deferred.reject));
             whenDone.then(cleanup, cleanup);
+            whenDone.then(next.deferred.resolve, next.deferred.resolve);
         }
     }
 
-    function handleError(err)
+    function handleError(reject)
     {
-        if (failBehaviour === FAIL_BEHAVIOUR_HALT)
+        return function(err)
         {
-            self.halt();
-            console.error(err);
-        }
-        else
-        {
-            console.warn(err);
-        }
+            if (failBehaviour === FAIL_BEHAVIOUR_HALT)
+            {
+                self.halt();
+                if (!self.suppressConsole)
+                {
+                    console.error(err);
+                }
+                reject(err);
+            }
+            else if (failBehaviour === FAIL_BEHAVIOUR_WARN)
+            {
+                if (!self.suppressConsole)
+                {
+                    console.warn(err);
+                }
+            }
+            else
+            {
+                console.error("Wait... what?");
+            }
+        };
     }
 
     function runProcessor(context, processor)
@@ -134,7 +150,14 @@ function Pipeline()
         }
         if (runner)
         {
-            return runner(context, processor);
+            try
+            {
+                return runner(context, processor);
+            }
+            catch (err)
+            {
+                return Promise.reject(err);
+            }
         }
         else
         {
@@ -154,7 +177,21 @@ function Pipeline()
 
     function runProcessor_String(context, processor)
     {
-        return runProcessor(context, context.model.processors[processor.toLowerCase()]);
+        var runner;
+        var lname = processor.toLowerCase();
+        if (context.model && context.model.processors)
+        {
+            runner = context.model.processors[lname];
+        }
+        if (!runner)
+        {
+            runner = self.processors[lname];
+        }
+        if (!runner)
+        {
+            throw new Error("Couldn't find processor " + lname);
+        }
+        return runProcessor(context, runner);
     }
 
     function runProcessor_Object(context, processor)
@@ -190,6 +227,7 @@ function Pipeline()
 
             function processNext()
             {
+
                 if (temp.length === 0)
                 {
                     resolve();
@@ -197,7 +235,7 @@ function Pipeline()
                 else
                 {
                     var current = runProcessor(context, temp.shift());
-                    current.catch(handleError);
+                    current.catch(handleError(reject));
                     current.then(processNext, processNext);
                 }
             }
@@ -207,7 +245,7 @@ function Pipeline()
 
     function onFail(behaviour)
     {
-        if (behaviour !== "halt" && behaviour !== "warn")
+        if (behaviour !== FAIL_BEHAVIOUR_HALT && behaviour !== FAIL_BEHAVIOUR_WARN)
         {
             throw new Error("On fail only accepts a single string value which must be exactly '" + FAIL_BEHAVIOUR_HALT + "' or '" + FAIL_BEHAVIOUR_WARN + "'");
         }

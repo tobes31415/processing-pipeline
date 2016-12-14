@@ -11,6 +11,7 @@ describe('Pipeline', function()
     beforeEach(function()
     {
         pipeline = PipelineFactory.create();
+        pipeline.suppressConsole = true;
         stub = sinon.stub();
     });
 
@@ -133,6 +134,66 @@ describe('Pipeline', function()
         {
             assert(historySpy.calledOnce);
             done();
+        });
+    });
+    describe("when failBehaviour is set to halt and there is a failure, ", function()
+    {
+        beforeEach(function()
+        {
+            pipeline.onFail("halt");
+        });
+        it('the promise is rejected', function(done)
+        {
+            var willFail = sinon.stub().throws();
+            var spy = sinon.spy();
+            var finishTest = function()
+            {
+                done();
+            };
+            pipeline.process(
+            {}, [willFail, spy]).then(null, finishTest)
+        });
+        it('subsequent processes are NOT called', function(done)
+        {
+            var willFail = sinon.stub().throws();
+            var spy = sinon.spy();
+            var finishTest = function()
+            {
+                assert(!spy.called);
+                done();
+            };
+            pipeline.process(
+            {}, [willFail, spy]).then(finishTest, finishTest)
+        });
+    });
+    describe("when failBehaviour is set to warn and there is a failure, ", function()
+    {
+        beforeEach(function()
+        {
+            pipeline.onFail("warn");
+        });
+        it('the promise is resolved', function(done)
+        {
+            var willFail = sinon.stub().throws();
+            var spy = sinon.spy();
+            var finishTest = function()
+            {
+                done();
+            };
+            pipeline.process(
+            {}, [willFail, spy]).then(finishTest);
+        });
+        it('subsequent processes ARE called', function(done)
+        {
+            var willFail = sinon.stub().throws();
+            var spy = sinon.spy();
+            var finishTest = function()
+            {
+                assert(spy.called);
+                done();
+            };
+            pipeline.process(
+            {}, [willFail, spy]).then(finishTest)
         });
     });
 });
