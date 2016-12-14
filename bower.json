@@ -11,8 +11,7 @@
     "test",
     ".*",
     "gulpfile.js",
-    "readme.md",
-    "bower.json"
+    "readme.md"
   ],
   "main":[
     "dist/processing-pipeline.js"
