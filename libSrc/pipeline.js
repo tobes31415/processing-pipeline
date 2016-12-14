@@ -1,5 +1,5 @@
 import CacheManager from './cacheManager.js';
-import detectChanges from './changeDetector.js';
+import * as changeDetector from './changeDetector.js';
 import Deferred from './deferred.js';
 
 export default Pipeline;
@@ -73,19 +73,20 @@ function Pipeline()
         if (queue.length > 0)
         {
             var next = queue.shift();
-            var cleanup = function()
-            {
-                currentlyProcessing = false;
-                next.deferred.resolve();
-                setTimeout(checkState, 0);
-            };
-            var whenDone = runProcessor(next.processor,
-            {
+            var context = {
                 model: next.model,
                 history: history,
                 changed:
                 {}
-            });
+            };
+            var cleanup = function()
+            {
+                currentlyProcessing = false;
+                changeDetector.updateHistory(context);
+                next.deferred.resolve();
+                setTimeout(checkState, 0);
+            };
+            var whenDone = runProcessor(context, next.processor);
             whenDone.catch(handleError);
             whenDone.then(cleanup, cleanup);
         }
@@ -104,7 +105,7 @@ function Pipeline()
         }
     }
 
-    function runProcessor(processor, context)
+    function runProcessor(context, processor)
     {
         if (!processor)
         {
@@ -114,60 +115,94 @@ function Pipeline()
         {
             return Promise.resolve();
         }
+        var runner;
         if (typeof processor === "function")
         {
-            return Promise.resolve(processor(
-            {
-                model: context.model,
-                changed: context.changed,
-                cache: cache.get(self, processor)
-            }));
+            runner = runProcessor_Function;
         }
         else if (typeof processor === "string")
         {
-            return runProcessor(context.model.processors[processor.toLowerCase()]);
+            runner = runProcessor_String;
         }
         else if (Array.isArray(processor))
         {
-            return new Promise(function(resolve, reject)
-            {
-                var temp = processor.slice();
-
-                function processNext()
-                {
-                    if (temp.length === 0)
-                    {
-                        resolve();
-                    }
-                    else
-                    {
-                        var current = runProcessor(temp.shift(), context);
-                        current.catch(handleError);
-                        current.then(processNext, processNext);
-                    }
-                }
-            });
+            runner = runProcessor_Array;
         }
         else if (typeof processor === "object")
         {
-            if (!Array.isArray(process.runs))
-            {
-                throw new Error("Object based processor must have an array of sub processors called 'runs'");
-            }
-            var runThis = true;
-            if (Array.isArray(processor.watches))
-            {
-                runThis = detectChanges(processor.watches, context);
-            }
-            if (runThis)
-            {
-                return runProcessor(processor.runs, context);
-            }
-            else
-            {
-                return Promise.resolve();
-            }
+            runner = runProcessor_Object;
         }
+        if (runner)
+        {
+            return runner(context, processor);
+        }
+        else
+        {
+            throw new Error("Not sure how to run processor", processor);
+        }
+    }
+
+    function runProcessor_Function(context, processor)
+    {
+        return Promise.resolve(processor(
+        {
+            model: context.model,
+            changed: context.changed,
+            cache: cache.get(self, processor)
+        }));
+    }
+
+    function runProcessor_String(context, processor)
+    {
+        return runProcessor(context, context.model.processors[processor.toLowerCase()]);
+    }
+
+    function runProcessor_Object(context, processor)
+    {
+        if (!processor.runs || !(typeof processor.runs === "string" || typeof processor.runs === "object" || typeof processor.runs === "function"))
+        {
+            throw new Error("Object based processor must have a 'runs' property containing a processor defintion");
+        }
+        var runThis = true;
+        if (typeof processor.watches === "string")
+        {
+            processor.watches = [processor.watches];
+        }
+        if (Array.isArray(processor.watches))
+        {
+            runThis = changeDetector.detectChanges(processor.watches, context);
+        }
+        if (runThis)
+        {
+            return runProcessor(context, processor.runs);
+        }
+        else
+        {
+            return Promise.resolve();
+        }
+    }
+
+    function runProcessor_Array(context, processor)
+    {
+        return new Promise(function(resolve, reject)
+        {
+            var temp = processor.slice();
+
+            function processNext()
+            {
+                if (temp.length === 0)
+                {
+                    resolve();
+                }
+                else
+                {
+                    var current = runProcessor(context, temp.shift());
+                    current.catch(handleError);
+                    current.then(processNext, processNext);
+                }
+            }
+            processNext();
+        });
     }
 
     function onFail(behaviour)

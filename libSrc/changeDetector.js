@@ -1,5 +1,5 @@
-import JSON_CD from './changeDetector_JSON.js';
-import ID_CD from './changeDetector_Identity.js';
+import * as JSON_CD from './changeDetector_JSON.js';
+import * as ID_CD from './changeDetector_Identity.js';
 
 const CHANGE_MODE_SUFFIX = "_ChangeMode";
 const MODE_JSON = "json";

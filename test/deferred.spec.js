@@ -3,7 +3,7 @@ import assert from 'assert';
 
 describe('Deferred', function()
 {
-    it ('returns a function', function()
+    it('returns a function', function()
     {
         assert(typeof Deferred === "function");
     });
