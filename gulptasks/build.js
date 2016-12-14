@@ -16,6 +16,9 @@ function packFiles(entryFilename, outputPath, outputFilename, debug, callback)
           publicPath:'',
           filename: outputFilename,
           libraryTarget: 'umd'
+        },
+        node:{
+            process: false
         }
     };
     if (debug)
