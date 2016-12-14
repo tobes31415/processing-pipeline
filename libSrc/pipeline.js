@@ -13,7 +13,7 @@ function Pipeline()
     "use strict";
 
     var self = this;
-    var failBehaviour = FAIL_BEHAVIOUR_HALT;
+    var failBehaviour = FAIL_BEHAVIOUR_WARN;
     var queue = [];
     var cache = new CacheManager();
     var isHalted = false;
@@ -31,6 +31,15 @@ function Pipeline()
 
     function process(model, processor)
     {
+        if (isHalted)
+        {
+            if (!self.suppressConsole)
+            {
+                console.error("Can't accept new process request because the pipeline is halted")
+            }
+            return Promise.reject("pipeline is halted");
+        }
+        
         var defer = Deferred();
         queue.push(
         {
