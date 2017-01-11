@@ -39,7 +39,7 @@ function Pipeline()
             }
             return Promise.reject("pipeline is halted");
         }
-        
+
         var defer = Deferred();
         queue.push(
         {

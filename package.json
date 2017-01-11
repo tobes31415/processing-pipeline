@@ -1,6 +1,6 @@
 {
   "name": "processing-pipeline",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Runs complex operations using multiple steps",
   "main": "publish/processing-pipeline.js",
   "scripts": {
