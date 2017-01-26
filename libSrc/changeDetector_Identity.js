@@ -52,8 +52,7 @@ export function updateHistory(propName, context)
     }
     else if (typeof value === "object")
     {
-        context.history[propName] = context.history[propName] ||
-        {};
+        context.history[propName] = {};
         for (var subkey in value)
         {
             context.history[propName][subkey] = value[subkey];

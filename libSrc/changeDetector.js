@@ -25,7 +25,7 @@ export function detectChanges(watch, context)
 
 export function updateHistory(context)
 {
-    for (var key in context.changed)
+    for (var key in context.model)
     {
         modeSelect(key, context).updateHistory(key, context);
     }
