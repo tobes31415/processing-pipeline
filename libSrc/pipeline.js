@@ -83,6 +83,7 @@ function Pipeline()
 
         if (queue.length > 0)
         {
+            currentlyProcessing = true;
             var next = queue.shift();
             var context = {
                 model: next.model,
