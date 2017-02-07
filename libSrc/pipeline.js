@@ -35,7 +35,7 @@ function Pipeline()
         {
             if (!self.suppressConsole)
             {
-                console.error("Can't accept new process request because the pipeline is halted")
+                console.error("Can't accept new process request because the pipeline is halted");
             }
             return Promise.reject("pipeline is halted");
         }
