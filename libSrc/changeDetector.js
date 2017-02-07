@@ -25,8 +25,21 @@ export function detectChanges(watch, context)
 
 export function updateHistory(context)
 {
+    var keys = {};
     for (var key in context.model)
     {
+        keys[key] = true;
+    }
+    for (key in context.changed)
+    {
+        keys[key] = true;
+    }
+    for (key in keys)
+    {
+        if (key.indexOf(CHANGE_MODE_SUFFIX) !== -1)
+        {
+            continue;
+        }
         modeSelect(key, context).updateHistory(key, context);
     }
 }
