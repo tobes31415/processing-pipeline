@@ -26,6 +26,7 @@ function Pipeline()
     self.restart = restart;
     self.onFail = onFail;
     self.suppressConsole = false;
+    self.debug = false;
 
     ////////////////////
 
@@ -95,6 +96,9 @@ function Pipeline()
             {
                 currentlyProcessing = false;
                 changeDetector.updateHistory(context);
+                if (self.debug) {
+                    console.log(context.performance);
+                }
                 setTimeout(checkState, 0);
             };
             var whenDone = runProcessor(context, next.processor);
@@ -201,7 +205,17 @@ function Pipeline()
         {
             throw new Error("Couldn't find processor " + lname);
         }
-        return runProcessor(context, runner);
+        
+        var start = performance.now();
+        var result = runProcessor(context, runner);
+        result.then(function()
+        {
+            var finish = performance.now();
+            context.performance = context.performance ||
+            {};
+            context.performance[lname] = finish - start;
+        });
+        return result;
     }
 
     function runProcessor_Object(context, processor)
