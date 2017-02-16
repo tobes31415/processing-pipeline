@@ -96,7 +96,8 @@ function Pipeline()
             {
                 currentlyProcessing = false;
                 changeDetector.updateHistory(context);
-                if (self.debug) {
+                if (self.debug)
+                {
                     console.log(context.performance);
                 }
                 setTimeout(checkState, 0);
@@ -205,7 +206,7 @@ function Pipeline()
         {
             throw new Error("Couldn't find processor " + lname);
         }
-        
+
         var start = performance.now();
         var result = runProcessor(context, runner);
         result.then(function()
