@@ -214,7 +214,7 @@ function Pipeline()
             var finish = performance.now();
             context.performance = context.performance ||
             {};
-            context.performance[lname] = finish - start;
+            context.performance[lname] = Math.floor((finish - start) * 10000) / 10000;
         });
         return result;
     }
