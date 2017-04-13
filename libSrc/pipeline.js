@@ -98,7 +98,17 @@ function Pipeline()
                 changeDetector.updateHistory(context);
                 if (self.debug)
                 {
-                    console.log(context.performance);
+                    var fast = {};
+                    var slow = {};
+                    for (var key in context.performance){
+                        var value = context.performance[key];
+                        if (value >= 2) {
+                            slow[key] = value;
+                        } else {
+                            fast[key] = value;
+                        }
+                    }
+                    console.log(slow, fast);
                 }
                 setTimeout(checkState, 0);
             };
