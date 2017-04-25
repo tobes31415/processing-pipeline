@@ -19,6 +19,8 @@ function Pipeline()
     var isHalted = false;
     var currentlyProcessing = false;
     var history = {};
+    
+    var didRunOnceSymbol = Symbol("didRunOnce");
 
     self.processors = {};
     self.process = process;
@@ -243,6 +245,10 @@ function Pipeline()
         if (Array.isArray(processor.watches))
         {
             runThis = changeDetector.detectChanges(processor.watches, context);
+        }
+        if (!processor[didRunOnceSymbol]) {
+            runThis = true;
+            processor[didRunOnceSymbol] = true;
         }
         if (runThis)
         {
