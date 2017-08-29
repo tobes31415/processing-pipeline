@@ -1,7 +1,6 @@
 export default function Deferred()
 {
-    var self = this ||
-    {};
+    var self = {};
     self.promise = new Promise(function(resolve, reject)
     {
         self.resolve = resolve;
